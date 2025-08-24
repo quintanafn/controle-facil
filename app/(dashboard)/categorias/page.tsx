@@ -15,7 +15,7 @@ interface Categoria {
   nome: string
   descricao: string | null
   cor: string
-  tipo: 'entrada' | 'saida' | 'ambos'
+  tipo: 'receita' | 'despesa'
   user_id: string
   created_at: string
 }
@@ -30,7 +30,7 @@ export default function Categorias() {
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
   const [cor, setCor] = useState('#3B82F6')
-  const [tipo, setTipo] = useState<'entrada' | 'saida' | 'ambos'>('ambos')
+  const [tipo, setTipo] = useState<'receita' | 'despesa'>('receita')
   
   const supabase = createClient()
   
@@ -62,7 +62,7 @@ export default function Categorias() {
     setNome('')
     setDescricao('')
     setCor('#3B82F6')
-    setTipo('ambos')
+    setTipo('receita')
     setEditingCategoria(null)
   }
   
@@ -110,13 +110,18 @@ export default function Categorias() {
         toast.success('Categoria atualizada com sucesso')
       } else {
         // Criar nova categoria
+        const { data: userData, error: userError } = await supabase.auth.getUser()
+        
+        if (userError) throw userError
+        
         const { data, error } = await supabase
           .from('categorias')
           .insert({
             nome,
             descricao: descricao || null,
             cor,
-            tipo
+            tipo,
+            user_id: userData.user.id
           })
           .select()
         
@@ -164,14 +169,12 @@ export default function Categorias() {
   }
   
   // Renderizar badge de tipo
-  const renderTipoBadge = (tipo: 'entrada' | 'saida' | 'ambos') => {
+  const renderTipoBadge = (tipo: 'receita' | 'despesa') => {
     switch (tipo) {
-      case 'entrada':
-        return <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Entrada</span>
-      case 'saida':
-        return <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">Saída</span>
-      case 'ambos':
-        return <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Ambos</span>
+      case 'receita':
+        return <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Receita</span>
+      case 'despesa':
+        return <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">Despesa</span>
     }
   }
 
@@ -234,12 +237,11 @@ export default function Categorias() {
                 <select
                   id="tipo"
                   value={tipo}
-                  onChange={(e) => setTipo(e.target.value as 'entrada' | 'saida' | 'ambos')}
+                  onChange={(e) => setTipo(e.target.value as 'receita' | 'despesa')}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <option value="entrada">Entrada</option>
-                  <option value="saida">Saída</option>
-                  <option value="ambos">Ambos</option>
+                  <option value="receita">Receita</option>
+                  <option value="despesa">Despesa</option>
                 </select>
               </div>
             </div>

@@ -36,7 +36,7 @@ interface Categoria {
   id: string
   nome: string
   cor: string
-  tipo: 'entrada' | 'saida' | 'ambos'
+  tipo: 'receita' | 'despesa'
 }
 
 interface Conta {
@@ -239,6 +239,9 @@ export default function FluxoCaixa() {
         toast.success('Lançamento atualizado com sucesso')
       } else {
         // Criar novo lançamento
+        const { data: userData, error: userError } = await supabase.auth.getUser()
+        if (userError) throw userError
+        
         const { error } = await supabase
           .from('lancamentos')
           .insert({
@@ -248,7 +251,8 @@ export default function FluxoCaixa() {
             tipo,
             categoria_id: categoriaId || null,
             conta_id: contaId,
-            comprovante_url: comprovanteUrl
+            comprovante_url: comprovanteUrl,
+            user_id: userData.user.id
           })
         
         if (error) throw error
@@ -483,7 +487,7 @@ export default function FluxoCaixa() {
                 >
                   <option value="">Selecione uma categoria</option>
                   {categorias
-                    .filter(c => c.tipo === tipo || c.tipo === 'ambos')
+                    .filter(c => (tipo === 'entrada' && c.tipo === 'receita') || (tipo === 'saida' && c.tipo === 'despesa'))
                     .map(categoria => (
                       <option key={categoria.id} value={categoria.id}>
                         {categoria.nome}

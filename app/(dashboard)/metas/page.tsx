@@ -21,6 +21,7 @@ interface Meta {
   data_inicio: string
   data_fim: string | null
   concluida: boolean
+  tipo: 'receita' | 'despesa'
   user_id: string
   created_at: string
 }
@@ -38,6 +39,7 @@ export default function Metas() {
   const [valorAtual, setValorAtual] = useState('')
   const [dataInicio, setDataInicio] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [dataFim, setDataFim] = useState('')
+  const [tipo, setTipo] = useState<'receita' | 'despesa'>('receita')
   
   const supabase = createClient()
   
@@ -49,7 +51,6 @@ export default function Metas() {
       const { data, error } = await supabase
         .from('metas_financeiras')
         .select('*')
-        .order('concluida', { ascending: true })
         .order('data_fim', { ascending: true })
       
       if (error) {
@@ -73,6 +74,7 @@ export default function Metas() {
     setValorAtual('')
     setDataInicio(format(new Date(), 'yyyy-MM-dd'))
     setDataFim('')
+    setTipo('receita')
     setEditingMeta(null)
   }
   
@@ -85,6 +87,7 @@ export default function Metas() {
     setValorAtual(meta.valor_atual.toString())
     setDataInicio(meta.data_inicio)
     setDataFim(meta.data_fim || '')
+    setTipo(meta.tipo)
     setIsDialogOpen(true)
   }
   
@@ -111,6 +114,11 @@ export default function Metas() {
     }
     
     try {
+      // Extrair mês e ano da data de início para os campos obrigatórios
+      const dataInicioObj = new Date(dataInicio);
+      const mes = dataInicioObj.getMonth() + 1; // getMonth() retorna 0-11
+      const ano = dataInicioObj.getFullYear();
+      
       const metaData = {
         titulo,
         descricao: descricao || null,
@@ -118,7 +126,11 @@ export default function Metas() {
         valor_atual: Number(valorAtual),
         data_inicio: dataInicio,
         data_fim: dataFim || null,
-        concluida: Number(valorAtual) >= Number(valorMeta)
+        concluida: Number(valorAtual) >= Number(valorMeta),
+        tipo,
+        valor: Number(valorMeta), // Campo valor obrigatório
+        mes, // Campo mes obrigatório
+        ano  // Campo ano obrigatório
       }
       
       if (editingMeta) {
@@ -142,9 +154,15 @@ export default function Metas() {
         toast.success('Meta atualizada com sucesso')
       } else {
         // Criar nova meta
+        const { data: userData, error: userError } = await supabase.auth.getUser()
+        if (userError) throw userError
+        
         const { data, error } = await supabase
           .from('metas_financeiras')
-          .insert(metaData)
+          .insert({
+            ...metaData,
+            user_id: userData.user.id
+          })
           .select()
         
         if (error) throw error
@@ -276,6 +294,36 @@ export default function Metas() {
                   onChange={(e) => setDescricao(e.target.value)} 
                   placeholder="Detalhes sobre sua meta"
                 />
+              </div>
+              
+              <div className="space-y-2 mb-4">
+                <Label>Tipo</Label>
+                <div className="flex gap-4">
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="receita"
+                      name="tipo"
+                      value="receita"
+                      checked={tipo === 'receita'}
+                      onChange={() => setTipo('receita')}
+                      className="w-4 h-4 text-green-600"
+                    />
+                    <Label htmlFor="receita" className="ml-2 text-sm font-medium">Receita</Label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="despesa"
+                      name="tipo"
+                      value="despesa"
+                      checked={tipo === 'despesa'}
+                      onChange={() => setTipo('despesa')}
+                      className="w-4 h-4 text-red-600"
+                    />
+                    <Label htmlFor="despesa" className="ml-2 text-sm font-medium">Despesa</Label>
+                  </div>
+                </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">

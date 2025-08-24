@@ -120,6 +120,10 @@ export default function Contas() {
         toast.success('Conta atualizada com sucesso')
       } else {
         // Criar nova conta
+        const { data: userData, error: userError } = await supabase.auth.getUser()
+        
+        if (userError) throw userError
+        
         const { data, error } = await supabase
           .from('contas')
           .insert({
@@ -127,7 +131,8 @@ export default function Contas() {
             tipo,
             saldo: Number(saldo),
             instituicao: instituicao || null,
-            cor
+            cor,
+            user_id: userData.user.id
           })
           .select()
         

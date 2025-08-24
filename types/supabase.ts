@@ -6,7 +6,7 @@ export type Database = {
           id: string
           nome: string
           cor: string
-          tipo: 'entrada' | 'saida' | 'ambos'
+          tipo: 'receita' | 'despesa'
           user_id: string
           created_at: string
         }
@@ -14,7 +14,7 @@ export type Database = {
           id?: string
           nome: string
           cor: string
-          tipo: 'entrada' | 'saida' | 'ambos'
+          tipo: 'receita' | 'despesa'
           user_id?: string
           created_at?: string
         }
@@ -22,7 +22,7 @@ export type Database = {
           id?: string
           nome?: string
           cor?: string
-          tipo?: 'entrada' | 'saida' | 'ambos'
+          tipo?: 'receita' | 'despesa'
           user_id?: string
           created_at?: string
         }
