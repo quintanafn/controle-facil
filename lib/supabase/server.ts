@@ -14,11 +14,11 @@ export async function createClient() {
         get(name: string): string | undefined {
           return cookieStore.get(name)?.value
         },
-        set(name: string, value: string, options: CookieOptions): void {
-          cookieStore.set({ name, value, ...options })
+        set(name: string, value: string, options: CookieOptions & { expires?: Date }): void {
+          cookieStore.set({ name, value, ...options as CookieOptions })
         },
-        remove(name: string, options: CookieOptions): void {
-          cookieStore.set({ name, value: '', ...options })
+        remove(name: string, options: CookieOptions & { expires?: Date }): void {
+          cookieStore.set({ name, value: '', ...options as CookieOptions })
         },
       },
     }

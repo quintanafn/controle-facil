@@ -128,12 +128,14 @@ export default function FluxoCaixa() {
     }
     
     fetchData()
-  }, [supabase, fetchLancamentos])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   
   // Atualizar lançamentos quando mudar o mês ou filtro
   useEffect(() => {
     fetchLancamentos()
-  }, [currentMonth, filtroTipo, fetchLancamentos])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentMonth, filtroTipo])
   
   // Resetar formulário
   const resetForm = () => {
