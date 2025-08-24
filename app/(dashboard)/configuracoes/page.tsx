@@ -72,7 +72,7 @@ export default function Configuracoes() {
     }
     
     fetchProfile()
-  }, [])
+  }, [supabase])
   
   // Atualizar perfil
   const handleUpdateProfile = async () => {

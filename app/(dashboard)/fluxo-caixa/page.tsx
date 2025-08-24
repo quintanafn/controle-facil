@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { PlusCircle, ArrowUpCircle, ArrowDownCircle, Filter, Calendar, Trash2, Pencil } from 'lucide-react'
+import { PlusCircle, ArrowUpCircle, ArrowDownCircle, Trash2, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { format, parseISO, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -65,7 +65,34 @@ export default function FluxoCaixa() {
   const [comprovante, setComprovante] = useState<File | null>(null)
   
   const supabase = createClient()
-  
+
+  // Carregar lançamentos com base no mês selecionado e filtros
+  const fetchLancamentos = useCallback(async () => {
+    try {
+      const firstDay = startOfMonth(currentMonth)
+      const lastDay = endOfMonth(currentMonth)
+      
+      let query = supabase
+        .from('lancamentos')
+        .select('*, categorias(nome, cor), contas(nome)')
+        .gte('data', format(firstDay, 'yyyy-MM-dd'))
+        .lte('data', format(lastDay, 'yyyy-MM-dd'))
+        .order('data', { ascending: false })
+      
+      if (filtroTipo !== 'todos') {
+        query = query.eq('tipo', filtroTipo)
+      }
+      
+      const { data, error } = await query
+      
+      if (error) throw error
+      setLancamentos(data || [])
+    } catch (error) {
+      console.error('Erro ao carregar lançamentos:', error)
+      toast.error('Erro ao carregar lançamentos')
+    }
+  }, [supabase, currentMonth, filtroTipo])
+
   // Carregar dados iniciais
   useEffect(() => {
     const fetchData = async () => {
@@ -101,39 +128,12 @@ export default function FluxoCaixa() {
     }
     
     fetchData()
-  }, [])
-  
-  // Carregar lançamentos com base no mês selecionado e filtros
-  const fetchLancamentos = async () => {
-    try {
-      const firstDay = startOfMonth(currentMonth)
-      const lastDay = endOfMonth(currentMonth)
-      
-      let query = supabase
-        .from('lancamentos')
-        .select('*, categorias(nome, cor), contas(nome)')
-        .gte('data', format(firstDay, 'yyyy-MM-dd'))
-        .lte('data', format(lastDay, 'yyyy-MM-dd'))
-        .order('data', { ascending: false })
-      
-      if (filtroTipo !== 'todos') {
-        query = query.eq('tipo', filtroTipo)
-      }
-      
-      const { data, error } = await query
-      
-      if (error) throw error
-      setLancamentos(data || [])
-    } catch (error) {
-      console.error('Erro ao carregar lançamentos:', error)
-      toast.error('Erro ao carregar lançamentos')
-    }
-  }
+  }, [supabase, fetchLancamentos])
   
   // Atualizar lançamentos quando mudar o mês ou filtro
   useEffect(() => {
     fetchLancamentos()
-  }, [currentMonth, filtroTipo])
+  }, [currentMonth, filtroTipo, fetchLancamentos])
   
   // Resetar formulário
   const resetForm = () => {

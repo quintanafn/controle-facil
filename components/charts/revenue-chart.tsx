@@ -13,7 +13,7 @@ import {
 import { Bar } from 'react-chartjs-2'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, parseISO } from 'date-fns'
+import { startOfMonth, endOfMonth, eachDayOfInterval, format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 // Registrar componentes do Chart.js

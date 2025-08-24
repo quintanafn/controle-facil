@@ -63,7 +63,7 @@ export default function Metas() {
     }
     
     fetchMetas()
-  }, [])
+  }, [supabase])
   
   // Resetar formulário
   const resetForm = () => {

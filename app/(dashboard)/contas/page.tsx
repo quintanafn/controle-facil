@@ -57,7 +57,7 @@ export default function Contas() {
     }
     
     fetchContas()
-  }, [])
+  }, [supabase])
   
   // Resetar formulário
   const resetForm = () => {

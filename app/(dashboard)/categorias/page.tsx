@@ -55,7 +55,7 @@ export default function Categorias() {
     }
     
     fetchCategorias()
-  }, [])
+  }, [supabase])
   
   // Resetar formulário
   const resetForm = () => {

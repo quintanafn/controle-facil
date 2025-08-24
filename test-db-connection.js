@@ -1,5 +1,5 @@
 // Script para testar a conexão com o Supabase
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 // Usar as mesmas variáveis de ambiente que estão no .env.local
 const supabaseUrl = 'https://jsiuymggoblgwaftqsui.supabase.co';
@@ -29,3 +29,5 @@ async function testConnection() {
 }
 
 testConnection();
+
+// Para executar este arquivo, use: node --experimental-modules test-db-connection.js
